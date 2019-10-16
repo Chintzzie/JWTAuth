@@ -30,7 +30,7 @@ router.post("/register", function(req, res){
       if (err) return res.status(500).send("There was a problem registering the user.")
       // create a token
       var token = jwt.sign({ id: user._id }, config.secret, {
-        expiresIn: config.expiresIn
+        expiresIn: config.expiresIn/1000
       });
       res.clearCookie('access-token'); 
       res.cookie('access-token',token,{httpOnly: true,expires: new Date(Date.now()+config.expiresIn)}); 
@@ -54,7 +54,7 @@ router.post("/login", function(req, res){
             return res.redirect("/");
         
         var token = jwt.sign({ id: user._id }, config.secret, {
-            expiresIn: config.expiresIn 
+            expiresIn: config.expiresIn/1000 
         });
         res.clearCookie('access-token'); 
         res.cookie('access-token',token,{httpOnly: true,expires: new Date(Date.now()+config.expiresIn)});
