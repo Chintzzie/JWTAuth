@@ -7,14 +7,14 @@ var middleware = require("../middleware");
 var config=require("../config");
 //root route
 router.get("/",middleware.validate,function(req, res){
-    User.findById(req.id,function(err,user){
+    User.findById(res.locals.id,function(err,user){
       res.render("landing",{name: user.name});
     });
     
 });
 
 // show register form
-router.get("/register", function(req, res){
+router.get("/register",middleware.isLoggedIn,function(req, res){
    res.render("register",{name: null}); 
 });
 
@@ -39,12 +39,12 @@ router.post("/register", function(req, res){
 });
 
 //show login form
-router.get("/login", function(req, res){
+router.get("/login", middleware.isLoggedIn,function(req, res){
    res.render("login",{name: null}); 
 });
 
 //handling login logic
-router.post("/login", function(req, res){
+router.post("/login",function(req, res){
     User.findOne({ email: req.body.email }, function (err, user) {
         if (err) return res.status(500).send('Error on the server.');
         if (!user) return res.status(404).send('No user found.');
@@ -54,10 +54,10 @@ router.post("/login", function(req, res){
             return res.redirect("/");
         
         var token = jwt.sign({ id: user._id }, config.secret, {
-            expiresIn: config.expiresIn/1000 
+            expiresIn: config.expiresIn
         });
         res.clearCookie('access-token'); 
-        res.cookie('access-token',token,{httpOnly: true,expires: new Date(Date.now()+config.expiresIn)});
+        res.cookie('access-token',token,{httpOnly: true,expires: new Date(Date.now()+config.expiresIn*1000)});
         res.redirect("/");
         });
 });
